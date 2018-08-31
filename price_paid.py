@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 
 import requests
+import argparse
+import datetime
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d',
+                        help='File type to download: latest | all',
+                        default='latest')
+    
+
+
+    return parser.parse_args()
 
 def schema():
     # Dictionary object with data type for
@@ -30,18 +41,24 @@ def schema():
 
 def main():
 
+    args = parse_args()
     print('Grabbing price paid data')
 
-    price_paid_latest = r'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
-                     r'pp-monthly-update-new-version.csv'
+    if args.d == 'latest':
+        download_url = r'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
+                       r'pp-monthly-update-new-version.csv'
+        download_fname = args.d
+    
+    elif args.d == 'all':
+        download_url = r'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
+                       r'pp-complete.csv'
 
-    price_paid_all = r'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/' \
-                     r'pp-complete.csv'
-
-    response = requests.get(price_paid_latest)
+    response = requests.get(download_url)
     text = response.text
+    date = str(datetime.date.today())
+    fname = f"{args.d}-{date}.csv"
 
-    with open('latest.csv', 'w+') as f:
+    with open(fname, 'w+') as f:
         f.writelines(text)
 
 
